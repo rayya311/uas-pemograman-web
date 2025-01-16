@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Sederhana</title>
+    <link rel="stylesheet" href="kalkulatorstyle.css">
+
+</head>
+<body>
+    <!-- HTML: Layout kalkulator -->
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="number">7</button>
+            <button class="number">8</button>
+            <button class="number">9</button>
+            <button class="clear">C</button>
+
+            <button class="number">4</button>
+            <button class="number">5</button>
+            <button class="number">6</button>
+            <button class="operator">*</button>
+
+            <button class="number">1</button>
+            <button class="number">2</button>
+            <button class="number">3</button>
+            <button class="operator">-</button>
+
+            <button class="number">0</button>
+            <button class="operator">,</button>
+            <button class="operator">/</button>
+            <button class="operator">+</button>
+            
+            <button class="operator equal">=</button> <!-- Tombol koma -->
+        </div>
+    </div>
+
+    <script>
+    
+        const display = document.getElementById('display');
+        let currentInput = '';
+        let previousInput = '';
+        let operator = null;
+
+        const buttons = document.querySelectorAll('button');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.textContent;
+
+                if (button.classList.contains('number')) {
+                    // Menangani input angka dan koma
+                    if (value === ',') {
+                        if (!currentInput.includes(',')) {
+                            currentInput += ',';
+                            updateDisplay(`${previousInput} ${operator || ''} ${currentInput}`.trim());
+                        }
+                    } else {
+                        currentInput += value;
+                        updateDisplay(`${previousInput} ${operator || ''} ${currentInput}`.trim());
+                    }
+                } else if (button.classList.contains('operator')) {
+                    if (value === '=') {
+                        // Melakukan operasi matematika
+                        if (operator && previousInput && currentInput) {
+                            currentInput = calculate(previousInput, currentInput, operator);
+                            operator = null;
+                            previousInput = '';
+                        }
+                        // Jika ada ekspresi yang melibatkan tanda kurung
+                        else {
+                            currentInput = calculateExpression(currentInput);
+                        }
+                    } else {
+                        // Menyimpan operator dan input sebelumnya
+                        if (currentInput) {
+                            previousInput = currentInput;
+                            currentInput = '';
+                        }
+                        operator = value;
+                    }
+                    updateDisplay(`${previousInput} ${operator || ''} ${currentInput}`.trim());
+                } else if (button.classList.contains('clear')) {
+                    // Menghapus semua input
+                    currentInput = '';
+                    previousInput = '';
+                    operator = null;
+                    updateDisplay('0');
+                }
+            });
+        });
+
+        // Fungsi untuk memperbarui layar tampilan
+        function updateDisplay(value) {
+            display.textContent = value;
+        }
+
+        // Fungsi untuk melakukan operasi matematika
+        function calculate(a, b, operator) {
+            a = parseFloat(a.replace(',', '.')); // Mengganti koma dengan titik
+            b = parseFloat(b.replace(',', '.')); // Mengganti koma dengan titik
+
+            let result;
+            switch (operator) {
+                case '+':
+                    result = a + b;
+                    break;
+                case '-':
+                    result = a - b;
+                    break;
+                case '*':
+                    result = a * b;
+                    break;
+                case '/':
+                    result = b !== 0 ? a / b : 'Error'; // Cek pembagian dengan nol
+                    break;
+                default:
+                    return '';
+            }
+
+            // Periksa apakah hasilnya bilangan bulat
+            return Number.isInteger(result) ? result.toString() : result.toFixed(2); // Format dengan 2 desimal jika diperlukan
+        }
+
+    </script>
+</body>
